@@ -6,8 +6,21 @@
 
 using namespace std;
 
-vector<int> compareVector(vector<int> a, vector<int> b) {
-	vector<int> res;
+int* insertionSort(int *list, int listLength)
+{
+	for (int i = 1; i < listLength; i++)
+	{
+		int j = i - 1;
+		while (j >= 0 && list[j] > list[j + 1])
+		{
+			swap(list[j], list[j + 1]);
+			j--;
+		}
+	}
+	return  list;
+}
+int* compareVector(int * a, int * b,int size1,int size2) {
+	/*vector<int> res;
 	int size = a.size() + b.size();
 	cout << size << endl;
 	while (res.size() !=size ) {
@@ -41,314 +54,273 @@ vector<int> compareVector(vector<int> a, vector<int> b) {
 		
 	}
 	return res;
+	*/
 
+	int* result = new int[size1 + size2];
+	int finallSize;int j = 0;
+	for (int i = 0; i < size1; i++) {
+		result[i] = a[i];
+	}
+	for (int i = size1; i < size1 + size2; i++) {
+		
+		result[i] = b[j];
+		j++;
+
+	}
+	
+	/*
+	if (size1 <= size2) finallSize = size1;
+	else  finallSize = size2;
+	cout << 121 << endl;
+		int j = 0;
+		int forB = 0;
+	for (int i = 0; i < finallSize; i++) {
+		
+		if (a[i] < b[forB]) {
+			//cout << a[i]<< " ";
+			result[j] = a[i];
+			j++;
+			
+		}
+		else {
+			result[j] = b[forB];
+			//cout << b[forB]<<" ";
+			j++;
+			forB++;
+			i--;
+			
+		}
+
+	}
+	//cout << 4545 << endl;
+	if (size1 < size2) {
+		for (int i = size1; i < size2; i++) {
+			result[i] = b[i];
+		}
+	}
+	else if (size2 < size1) {
+		for (int i = size2; i < size1; i++) {
+			result[i] = a[i];
+		}
+
+	}*/
+	cout << endl;
+	result = insertionSort(result, size1+size2);
+	
+	return result;
 }
-
+vector<int> createVector(int* list,int size) {
+	vector<int>v;
+	for (int i = 0; i < size; i++) {
+		v.push_back(list[i]);
+	}
+	return v;
+}
 int main(int argc, char* argv[])
 {
 	const int N = 15000;
 	const int sizeGroup = 1000;
-	int ProcCount, myRank,gr1_rank, gr2_rank,gr3_rank,gr4_rank, gr5_rank,inter1_rank,inter2_rank;
-	vector<int> array;	
+	int* answer, * result1, * result2= new int[N];
+	int* DataThirdSend = new int[4 * sizeGroup];
+	int* temp = new int[sizeGroup];
+	int* DataFirstSend = new int[sizeGroup];
+    int *  ResSecondSend= new int[4 * sizeGroup];
+	int* ResSecondSend7000 = new int[7* sizeGroup];
+	int* ResSecondSendFor14 = new int[3 * sizeGroup];
+	int *ResThirdSend = new int[8 * sizeGroup];
+	int* ResultSorting15000 = new int[N];
+	int* DataFourthSend = new int[8 * sizeGroup];
+	int* ResThirdSend7000 = new int[7 * sizeGroup];
+	int * ResFirstSend = new int[2 * sizeGroup];
+	int * DataSecondSend = new int[2*sizeGroup];
+	for (int i = 0; i < 2 * sizeGroup; i++) {
+		ResFirstSend[i] = 0;
+	}
+	for (int i = 0; i < 2 * sizeGroup; i++) {
+		DataSecondSend[i] = 0;
+	}
+	int ProcCount, myRank,NewProcRank;
+	int* array = new int[N];
 	int count = 0;
 	MPI_Status Status;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &ProcCount);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-	//Access to default group
-	MPI_Group base_grp, gr1, gr2, gr3, gr4, gr5;
-	MPI_Comm newcomm1, newcomm2, newcomm3, newcomm4, newcomm5,inter_comm12, inter_comm34;
-	//default_group
-	MPI_Comm_group(MPI_COMM_WORLD, &base_grp);
-	//массивы для передачи значений рангов
-	int * rank1= new int[3];
-	rank1[0]=1;
-	rank1[1] = 2;
-	rank1[2] = 3;
-	int rank2[3] = { 4, 5,  6 };
-	int rank3[3] = { 7, 8,  9 };
-	int rank4[3] = { 10, 11,  12 };
-	int rank5[3] = { 13, 14,  15 };
-	
-	//init vector
-	if (myRank == 0) {
-		for (int i = 0; i < N; i++) {
-			array.push_back(rand()% 100);
-			cout << array[i] << " ";
+	if (ProcCount == 15) {
+		//Access to default group
+		MPI_Group base_grp, newgroup;
+		MPI_Comm newcomm1;
+
+		//default_group
+		MPI_Comm_group(MPI_COMM_WORLD, &base_grp);
+		cout << "MyRank :" << myRank << endl;
+		//массивы для передачи значений рангов
+		int ranks[15] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 , 10, 11, 12 , 13, 14 };
+		int* ranks_excl = new int[1];
+		ranks_excl[0] = 0;
+
+		//init vector
+
+		if (myRank == 0) {
+			for (int i = 0; i < N; i++) {
+				array[i]=rand() % 100;
+				
+			}
+
 		}
+		//create 5 groups of proscces
+		MPI_Group_incl(base_grp, 15, ranks, &newgroup);
+
+		//cоздание ноыого коммуникаторв с одной группе
+		MPI_Comm_create(MPI_COMM_WORLD, newgroup, &newcomm1);
+
+		if (MPI_COMM_NULL != newcomm1) {
+			MPI_Comm_rank(newcomm1, &NewProcRank);
+			MPI_Comm_size(newcomm1, &ProcCount);
+		}
+		cout << "\nNewProcRank:" << NewProcRank << endl;
+		cout << "\nNewProcCount:" << ProcCount << endl;
+
+		//wait
+		MPI_Barrier(newcomm1);
+		//1000
+		MPI_Datatype TYPE1000;
+		MPI_Type_contiguous(sizeGroup, MPI_INT, &TYPE1000);
+		MPI_Type_commit(&TYPE1000);
+		//3000
+		MPI_Datatype TYPE2000;
+		MPI_Type_contiguous(sizeGroup * 2, MPI_INT, &TYPE2000);
+		MPI_Type_commit(&TYPE2000);
+		//6000
+		MPI_Datatype TYPE4000;
+		MPI_Type_contiguous(sizeGroup * 4, MPI_INT, &TYPE4000);
+		MPI_Type_commit(&TYPE4000);
+		//7000
+		MPI_Datatype TYPE7000;
+		MPI_Type_contiguous(sizeGroup * 7, MPI_INT, &TYPE7000);
+		MPI_Type_commit(&TYPE7000);
+		//8000
+		MPI_Datatype TYPE8000;
+		MPI_Type_contiguous(sizeGroup * 8, MPI_INT, &TYPE8000);
+		MPI_Type_commit(&TYPE8000);
+		MPI_Scatter(&array[0], 1, TYPE1000, &temp[0], 1, TYPE1000, 0, newcomm1);
+		temp = insertionSort(temp, sizeGroup);
+		if (NewProcRank == 1) cout << "First sending: \n";
+		//1
+		if (NewProcRank % 2 == 0 && NewProcRank != 14) {
+			MPI_Send(&temp[0], 1, TYPE1000, NewProcRank + 1, 0, newcomm1);
+			cout <<"1." << NewProcRank << " send " << NewProcRank +1 << endl;		
+		}
+		else if (NewProcRank % 2 == 1) {
+			MPI_Recv(&DataFirstSend[0], 1, TYPE1000,  NewProcRank - 1,0, newcomm1, &Status);
+			cout << "1." << NewProcRank << " got " << NewProcRank - 1 << endl;
+			ResFirstSend = compareVector(DataFirstSend,temp,1000,1000);
+			
+		
+		}
+		
+		MPI_Barrier(newcomm1);
+		//2
+		if (NewProcRank == 1) cout << "Second sending: \n";
+		if (NewProcRank % 4 == 1 && NewProcRank != 13) { //from 1 - 3, from 5 - 7, from 9 to 11
+			MPI_Send(&ResFirstSend[0], 1, TYPE2000, NewProcRank + 2, 0, newcomm1);
+			cout << "2." << NewProcRank << " send " << NewProcRank +2 << endl;
+		}
+		if (NewProcRank == 13) {
+			MPI_Send(&ResFirstSend[0], 1, TYPE2000, NewProcRank + 1, 0, newcomm1);
+			cout << "2.13 send 14!" << endl;
+		}
+		if (NewProcRank % 4 == 3) {
+			MPI_Recv(&DataSecondSend[0], 1, TYPE2000,  NewProcRank - 2, 0, newcomm1, &Status);
+			ResSecondSend = compareVector(DataSecondSend, ResFirstSend, 2000, 2000);
+			cout << "2.Sorted array :" << endl;
+			
+			cout << "2." << NewProcRank<< " got "<< NewProcRank-2 << endl;
+		}
+		if(NewProcRank==14) {//14 p
+			MPI_Recv(&DataSecondSend[0], 1, TYPE2000,  13, 0, newcomm1, &Status);
+			ResSecondSendFor14 = compareVector(DataSecondSend, temp, 2000, 1000);
+			cout << "2.Sorted array :" << endl;
+			for (int i = 0; i < 3000; i++) {
+				cout << ResSecondSendFor14[i] << " ";
+			}
+			cout << "2." << "14 got 13 !" << endl;
+		}
+	
+		MPI_Barrier(newcomm1);
+
+		if (NewProcRank == 1) cout << "3 sending: \n";
+		//3
+		if (NewProcRank == 3) { //from 3 -7 
+			MPI_Send(&ResSecondSend[0], 1, TYPE4000, NewProcRank + 4, 0, newcomm1);
+			cout << "3." << NewProcRank << " send " << NewProcRank +4 << endl;
+		}
+		if (NewProcRank == 7) { //from 7 - 14
+			MPI_Recv(&DataThirdSend[0], 1, TYPE4000,  NewProcRank - 4, 0,newcomm1, &Status);
+			ResThirdSend = compareVector(DataThirdSend, ResSecondSend,4000,4000);
+			
+			cout << "3." << NewProcRank<< " got "<< NewProcRank-4 << endl;
+			MPI_Send(&ResThirdSend[0], 1, TYPE8000, 14, 0, newcomm1);
+			cout << "3." << NewProcRank << " send " << 14<< endl;
+		}
+		if (NewProcRank == 11) { //from 11 - 14
+			MPI_Send(&ResSecondSend[0], 1, TYPE4000, NewProcRank + 3, 0, newcomm1);
+			cout << "3." << NewProcRank << " send " << NewProcRank +3 << endl;
+		}
+		if (NewProcRank == 14) {
+
+			MPI_Recv(&DataThirdSend[0], 1, TYPE4000,  NewProcRank - 3, 0,newcomm1, &Status);
+			ResThirdSend7000 = compareVector(DataThirdSend,ResSecondSendFor14,4000,3000);
+			cout << "3." << NewProcRank<< " got "<< NewProcRank-3 << endl;
+			
+			MPI_Recv(&DataFourthSend[0], 1, TYPE8000,  NewProcRank - 7, 0,newcomm1, &Status);
+			cout << "3." << NewProcRank<< " got "<< NewProcRank-7 << endl;
+			ResultSorting15000= compareVector(DataFourthSend,ResThirdSend7000,8000,7000);
+			cout << "3.Sorted array :" << endl;
+			for (int i = 0; i < 15000; i++) {
+				cout << ResultSorting15000[i] << " ";
+			}
+			//cout << "Sorted array :" << endl;
+			//for (int i = 0; i < 10000; i++) {
+				//cout << ResultSorting15000[i] << " ";
+			//}
+		}
+		
+		delete[] array, temp, answer, result1, result2, ResSecondSend, ResSecondSend7000, ResultSorting15000, ResThirdSend, ResThirdSend7000,DataFourthSend,DataSecondSend, DataThirdSend, DataFirstSend, ResFirstSend;
+		MPI_Group_free(&base_grp);
+		MPI_Group_free(&newgroup);
+		MPI_Comm_free(&newcomm1);
+		MPI_Type_free(&TYPE1000);
+		MPI_Type_free(&TYPE2000);
+		MPI_Type_free(&TYPE4000);
+		MPI_Type_free(&TYPE7000);
+		MPI_Type_free(&TYPE8000);
+		MPI_Finalize();
 		
 	}
 	
-	//create 5 groups of proscces
-	MPI_Group_incl(base_grp, 3, rank1, &gr1);
-	MPI_Group_incl(base_grp, 3, rank1, &gr2);
-	MPI_Group_incl(base_grp, 3, rank1, &gr3);
-	MPI_Group_incl(base_grp, 3, rank1, &gr4);
-	MPI_Group_incl(base_grp, 3, rank1, &gr5);
-	MPI_Group_rank(gr1, &gr1_rank);
-	MPI_Group_rank(gr2, &gr2_rank);
-	MPI_Group_rank(gr3, &gr3_rank);
-	MPI_Group_rank(gr4, &gr4_rank);
-	MPI_Group_rank(gr5, &gr5_rank);
-	
-	//cоздание ноыого коммуникаторв с одной группе
-	
-	//MPI_Comm_split(base_grp, 0, gr1_rank, &newcomm1);
-	/*
-	if (gr2_rank == 1 || gr2_rank == 0 || gr2_rank == 2)
-		MPI_Comm_split(base_grp, 1, gr2_rank, &newcomm2);
-
-	if (gr3_rank == 1 || gr3_rank == 0 || gr3_rank == 2)
-		MPI_Comm_split(base_grp, 2, gr3_rank, &newcomm3);
-
-	if (gr4_rank == 1 || gr4_rank == 0 || gr4_rank == 2)
-		MPI_Comm_split(base_grp, 3, gr4_rank, &newcomm4);
-
-	if (gr5_rank == 1 || gr5_rank == 0 || gr5_rank == 2)
-		MPI_Comm_split(base_grp, 4, gr5_rank, &newcomm5);
-	*/
-	
-
-	MPI_Comm_create(MPI_COMM_WORLD, gr1, &newcomm1);
-	/* 
-	MPI_Comm_create(MPI_COMM_WORLD, gr3, &newcomm3);
-	MPI_Comm_create(MPI_COMM_WORLD, gr4, &newcomm4);
-	MPI_Comm_create(MPI_COMM_WORLD, gr5, &newcomm5);
-	*/
-	
-	//wait
-	MPI_Barrier(MPI_COMM_WORLD);
-	//1000
-	MPI_Datatype type;
-	MPI_Type_contiguous(sizeGroup, MPI_INT, &type);
-	MPI_Type_commit(&type);
-	//3000
-	MPI_Datatype type1;
-	MPI_Type_contiguous(sizeGroup*3, MPI_INT, &type1);
-	MPI_Type_commit(&type1);
-	//6000
-	MPI_Datatype type2;
-	MPI_Type_contiguous(sizeGroup * 6, MPI_INT, &type2);
-	MPI_Type_commit(&type2);
-	
-	
-	
-	if (myRank == 0) {
-		//send data to newcomm1's groups
-		vector<int> v(sizeGroup);
-
-		for (int i = 0; i < 3; i++) {
-
-			copy(array.begin() + (i * sizeGroup), array.begin() + ((i + 1) * sizeGroup - 1), v.begin());
-			MPI_Send(&v, 1, type, i, 0, newcomm1);
-
-		}
-	}
-		/*
-		for (int i = 3; i < 6; i++) {
-
-			copy(array.begin()+(i * sizeGroup), array.begin()+((i + 1) * sizeGroup - 1), v.begin());
-			MPI_Send(&v, 1, type, i -3, 0, newcomm2);
-			
-		}
-		for (int i = 6; i < 9; i++) {
-
-			copy(array.begin()+(i * sizeGroup), array.begin()+((i + 1) * sizeGroup - 1), v.begin());
-			MPI_Send(&v, 1, type, i -6, 0, newcomm3);
-			
-		}
-		for (int i = 9; i < 12; i++) {
-			copy(array.begin() + (i * sizeGroup), array.begin() + ((i + 1) * sizeGroup - 1), v.begin());
-			MPI_Send(&v, 1, type, i - 9, 0, newcomm4);
-			
-		}
-		for (int i = 12; i < 15; i++) {
-			copy(array.begin() + (i * sizeGroup), array.begin() + ((i + 1) * sizeGroup - 1), v.begin());
-			MPI_Send(&v, 1, type, i - 12, 0, newcomm5);
-			
-		}
-
-	}
-	
-	vector<int> temp,temp13, temp123, temp23,temp13_14_15, temp13_15, temp14_15, temp46, temp56,temp789, temp79, temp89, temp10_12, temp11_12;
-	//sort and send in the group
-	for (int i = 0; i < 3; i++) {
-		if (gr1_rank == i) {
-			MPI_Recv(&temp, 1, type, 0, 0, MPI_COMM_WORLD,&Status);
-			sort(temp.begin(), temp.end());
-		}
-		if (gr1_rank == 0) {
-			MPI_Send(&temp, 1, type,gr1_rank+2, 0, newcomm1);
-		}
-		if (gr1_rank == 1) {
-			MPI_Send(&temp, 1, type,gr1_rank + 1, 0, newcomm1);
-		}
-		if (gr1_rank == 2) {
-			
-			MPI_Recv(&temp13, 1, type,gr1_rank-2, 0, newcomm1, &Status);
-			MPI_Recv(&temp23, 1, type, gr1_rank-1, 0, newcomm1, &Status);
-			vector<int>temp12 = compareVector(temp13, temp23);
-			temp123 = compareVector(temp12, temp);
-		}	
-	}
-	for (int i = 0; i < 3; i++) {
-
-		if (gr2_rank== i) {
-			MPI_Recv(&temp, 1, type, 0, 0, MPI_COMM_WORLD, &Status);
-			sort(temp.begin(), temp.end());
-		}
-		if (gr2_rank == 0) {
-			MPI_Send(&temp, 1, type,gr2_rank + 2, 0, newcomm2);
-		}
-		if (gr2_rank == 1) {
-			MPI_Send(&temp, 1, type, gr2_rank + 1, 0, newcomm2);
-		}
-		if (myRank == 2) {
-			
-			MPI_Recv(&temp46, 1, type, gr2_rank - 2, 0, newcomm2, &Status);
-			MPI_Recv(&temp56, 1, type,gr2_rank - 1, 0, newcomm2, &Status);
-			vector<int>temp45 = compareVector(temp46, temp56);
-			vector<int>temp456 = compareVector(temp45, temp);
-		}
-	}
-	for (int i = 0; i < 3; i++) {
-
-		if (gr3_rank == i) {
-			MPI_Recv(&temp, 1, type, 0, 0, MPI_COMM_WORLD, &Status);
-			sort(temp.begin(), temp.end());
-		}
-		if (gr3_rank == 0) {
-			MPI_Send(&temp, 1, type,gr3_rank + 2, 0, newcomm3);
-		}
-		if (gr3_rank == 1) {
-			MPI_Send(&temp, 1, type, gr3_rank + 1, 0, newcomm3);
-		}
-		if (gr3_rank == 2) {
-			
-			MPI_Recv(&temp79, 1, type, gr3_rank - 2, 0, newcomm3, &Status);
-			MPI_Recv(&temp89, 1, type, gr3_rank - 1, 0, newcomm3, &Status);
-			vector<int>temp78 = compareVector(temp79, temp89);
-			temp789 = compareVector(temp78, temp);
-		}
-		
-	}
-		for (int i = 0; i < 3; i++) {
-
-		if (gr4_rank == i) {
-			MPI_Recv(&temp, 1, type, 0, 0, MPI_COMM_WORLD, &Status);
-			sort(temp.begin(), temp.end());
-		}
-		if (gr4_rank == 0) {
-			MPI_Send(&temp, 1, type,gr4_rank + 2, 0, newcomm4);
-		}
-		if (gr4_rank== 1) {
-			MPI_Send(&temp, 1, type, gr4_rank + 1, 0, newcomm4);
-		}
-		if (gr4_rank == 2) {
-			
-			MPI_Recv(&temp10_12, 1, type, gr4_rank - 2, 0, newcomm4, &Status);
-			MPI_Recv(&temp11_12, 1, type,gr4_rank - 1, 0, newcomm4, &Status);
-			vector<int>temp10_11 = compareVector(temp11_12, temp10_12);
-			vector<int>temp10_11_12 = compareVector(temp10_11, temp);
-		}
-		
-	}
-	for (int i = 0; i < 3; i++) {
-
-		if (gr5_rank == i) {
-			MPI_Recv(&temp, 1, type, 0, 0,MPI_COMM_WORLD, &Status);
-			sort(temp.begin(), temp.end());
-		}
-		if (gr5_rank == 0) {
-			MPI_Send(&temp, 1, type, myRank + 2, 0, newcomm5);
-		}
-		if (gr5_rank == 1) {
-			MPI_Send(&temp, 1, type, myRank + 1, 0, newcomm5);
-		}
-		if (gr5_rank == 2) {
-			
-			MPI_Recv(&temp13_15, 1, type, gr5_rank - 2, 0, newcomm5, &Status);
-			MPI_Recv(&temp14_15, 1, type, gr5_rank - 1, 0, newcomm5, &Status);
-			vector<int>temp13_14 = compareVector(temp13_15, temp14_15);
-			temp13_14_15 = compareVector(temp13_14, temp);
-		}
-		
-	}
-
-
-	//wait
-	MPI_Barrier(newcomm1);
-	MPI_Barrier(newcomm2);
-	MPI_Barrier(newcomm3);
-	MPI_Barrier(newcomm4);
-	MPI_Barrier(newcomm5);
-	
-	MPI_Intercomm_create(newcomm1, 2, newcomm2,2, 0, &inter_comm12);
-	MPI_Comm_rank(inter_comm12, &inter1_rank);
-	cout << inter1_rank << endl;
-	MPI_Intercomm_create(newcomm3, 2, newcomm4, 2, 0, &inter_comm34);
-	MPI_Comm_rank(inter_comm34, &inter2_rank);
-	cout << inter2_rank << endl;
-	vector<int> dataFromGroup1,dataFromGroup3;
-	vector<int> resGroup12,resGroup34;
-	/*
-	//TO 3-6
-	if (myRank == 3) {
-		MPI_Send(&temp123, 1,type2, 6, 0, inter_comm12);
-	}
-	if (myRank == 6) {
-		MPI_Recv( &dataFromGroup1,	1,type1,3,0,inter_comm12, &Status);
-		resGroup12 = compareVector(temp, dataFromGroup1);
-		MPI_Send(&resGroup12, 1, type2, 0, 1, MPI_COMM_WORLD);
-
-	}
-	//TO 9-12
-	if (myRank == 9) {
-		MPI_Send(&temp789, 1, type2, 12, 0, inter_comm34);
-	}
-	if (myRank == 12) {
-		MPI_Recv(&dataFromGroup3, 1, type1, 9, 0, inter_comm34, &Status);
-		resGroup34 = compareVector(temp, dataFromGroup3);
-		MPI_Send(&resGroup34, 1, type2, 0, 1, MPI_COMM_WORLD);
-	}
-	//to15-0
-	if (myRank == 15) {
-		MPI_Send(&temp13_14_15, 1, type2, 0, 1, MPI_COMM_WORLD);
-	}
-
-	//receive from 6,15,12
-	vector<int> dataFromGroup12, dataFromGroup34, dataFromGroup5, result;
-	
-	
-	if (myRank == 0) {
-		MPI_Recv(&dataFromGroup12, 1, type2, 6, 1, MPI_COMM_WORLD, &Status);
-		MPI_Recv(&dataFromGroup34, 1, type2, 9, 1, MPI_COMM_WORLD, &Status);
-		MPI_Recv(&dataFromGroup5, 1, type, 15, 1, MPI_COMM_WORLD, &Status);
-
-		result = compareVector(compareVector(dataFromGroup12, dataFromGroup34),dataFromGroup5);
-		cout << endl;
-		for (int i = 0; i < 100; i++) {
-			cout << result[i] << " ";
-		}
-
-	}
-	
-	
-	
-
-	*/
-	MPI_Group_free(&base_grp);
-	MPI_Group_free(&gr2);
-	MPI_Group_free(&gr3);
-	MPI_Group_free(&gr1);
-	MPI_Group_free(&gr4);
-	MPI_Group_free(&gr5);
-	MPI_Type_free(&type);
-	MPI_Type_free(&type1);
-	MPI_Type_free(&type2);
-	MPI_Finalize();
 
 	return 0;
 }
 
 
+
+
+/*int main(int argc, char* argv[]) {
+	MPI_Status Status;
+	MPI_Init(&argc, &argv); int ProcCount, myRank, NewProcRank;
+	MPI_Comm_size(MPI_COMM_WORLD, &ProcCount);
+	MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+	int* a = new int[8]{ 2,6,10,12,12,22,44,66 };
+	int* b = new int[5]{ 1,2,3,4,5 };
+	cout << "dfd" << endl;
+	int* res = compareVector(a, b, 8, 5);
+	for (int i = 0; i <5+8; i++) {
+		cout<<res[i]<<" ";
+	}
+	MPI_Finalize();
+	delete[]a, b, res;
+
+
+return 0;
+}*/

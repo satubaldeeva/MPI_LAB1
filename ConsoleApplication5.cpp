@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 			}
 			cout << endl;
 			if (MasterSlaveRank != 0) {
-				MPI_Recv(&result[0], N, MPI_INT, 0, 1, MasterSlaveGridComm, &Status);
+				MPI_Recv(&result[0], N, MPI_INT, neigboars[0], 1, MasterSlaveGridComm, &Status);
 				cout << "Slaves(" << MasterSlaveRank << ")got such values from master :" << endl;
 				for (int i = 0; i < size; i++) {
 					cout << result[i] << " ";
@@ -109,8 +109,6 @@ int main(int argc, char* argv[])
 				cout << endl;
 			}
 				cout << endl;
-
-		
 			MPI_Comm_free(&MasterSlaveGridComm);
 		}
 		

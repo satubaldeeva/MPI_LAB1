@@ -71,6 +71,8 @@ int main(int argc, char* argv[])
 
 
 			MPI_Comm_free(&RingGridComm);
+			MPI_Comm_free(&ringComm);
+			MPI_Group_free(&ringGroup);
 
 		}
 
@@ -110,12 +112,13 @@ int main(int argc, char* argv[])
 			}
 				cout << endl;
 			MPI_Comm_free(&MasterSlaveGridComm);
+			MPI_Comm_free(&masterSlaveComm);
+			MPI_Group_free(&masterSlaveGroup);
 		}
 		
-	MPI_Group_free(&masterSlaveGroup);
-	MPI_Comm_free(&masterSlaveComm);
-	MPI_Comm_free(&ringComm);
-	MPI_Group_free(&ringGroup);
+	
+	
+	
 	MPI_Group_free(&base_grp);
 	
 	//MPI_Finalize();
